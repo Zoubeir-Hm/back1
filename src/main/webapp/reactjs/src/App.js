@@ -42,6 +42,7 @@ class App extends Component {
                                     <Routes>
                                         <Route path="/" element={<Bienvenue />} />
                                         <Route path="/add" element={<Voiture12 />} />
+                                        <Route path="/edit/:id" element={<Voiture12 />}/>
                                         <Route path="/list" element={<VoitureListe />} />
                                     </Routes>
                                     <Footer />

@@ -3,23 +3,55 @@ import { Card, Form, Button, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import axios from "axios";
-import MyToast from "./MyToast";
+import { useParams, useNavigate } from 'react-router-dom';
 
-export default class Voiture12 extends Component {
+class Voiture12 extends Component {
     constructor(props) {
         super(props);
         this.state = this.initialState;
         this.voitureChange = this.voitureChange.bind(this);
         this.submitVoiture = this.submitVoiture.bind(this);
+        this.updateVoiture = this.updateVoiture.bind(this);
     }
 
     initialState = {
+        id: '',  // Pour garder l'identifiant de la voiture à éditer
         marque: '',
         modele: '',
         couleur: '',
         immatricule: '',
         annee: '',
         prix: ''
+    }
+
+    componentDidMount() {
+        const voitureId = this.props.params.id;  // Obtenez l'ID de l'URL via props.params (useParams)
+        if (voitureId) {
+            this.findVoitureById(voitureId);
+        }
+    }
+
+    findVoitureById = (voitureId) => {
+        axios.get(`http://localhost:9093/api/voitures/${voitureId}`)
+            .then(response => {
+                if (response.data != null) {
+                    const idFromUrl = window.location.href.split("/").pop(); // Get the last segment of the URL as ID
+                    this.setState({
+                        id: idFromUrl, // Set the id from the URL
+                        marque: response.data.marque,
+                        modele: response.data.modele,
+                        couleur: response.data.couleur,
+                        immatricule: response.data.immatricule,
+                        annee: response.data.annee,
+                        prix: response.data.prix
+                    }, () => {
+                        console.log(this.state); // Log the updated state after setting it
+                    });
+                }
+            }).catch(error => {
+            console.error("Erreur lors de la récupération de la voiture :", error);
+            alert("Erreur lors de la récupération des détails de la voiture");
+        });
     }
 
     resetVoiture = () => {
@@ -34,7 +66,6 @@ export default class Voiture12 extends Component {
 
     submitVoiture(event) {
         event.preventDefault();
-        console.log("Données de la voiture soumise:", this.state);
         const voiture = {
             marque: this.state.marque,
             modele: this.state.modele,
@@ -44,30 +75,46 @@ export default class Voiture12 extends Component {
             prix: this.state.prix
         };
 
-        axios.post("http://localhost:9093/api/voitures", voiture)
+        if (this.state.id) {
+            this.updateVoiture(voiture);
+        } else {
+            axios.post("http://localhost:9093/api/voitures", voiture)
+                .then(response => {
+                    if (response.data != null) {
+                        this.setState(this.initialState);
+                        alert("Voiture enregistrée avec succès");
+                        this.props.navigate('/somepath'); // Navigate after successful submission
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur lors de l'enregistrement :", error);
+                    alert("Erreur lors de l'enregistrement de la voiture");
+                });
+        }
+    }
+
+    updateVoiture(voiture) {
+        axios.put(`http://localhost:9093/api/voitures/${this.state.id}`, voiture)
             .then(response => {
                 if (response.data != null) {
                     this.setState(this.initialState);
-                    alert("Voiture enregistrée avec succès");
+                    alert("Voiture mise à jour avec succès");
+                    this.props.navigate('/somepath');  // Navigate after successful update
                 }
             })
             .catch(error => {
-                console.error("Erreur lors de l'enregistrement :", error);
-                alert("Erreur lors de l'enregistrement de la voiture");
+                console.error("Erreur lors de la mise à jour :", error);
+                alert("Erreur lors de la mise à jour de la voiture");
             });
-
-
     }
 
     render() {
         return (
-
-
-                        < Card className = "border border-dark bg-dark text-white" >
-                    < Card.Header >
-                    < FontAwesomeIcon icon = {faPlusSquare}/> Ajouter une Voiture
-                    </Card.Header>
-                    <Form onReset={this.resetVoiture} onSubmit={this.submitVoiture} id="VoitureFormId">
+            <Card className="border border-dark bg-dark text-white">
+                <Card.Header>
+                    <FontAwesomeIcon icon={faPlusSquare}/> {this.state.id ? "Modifier la Voiture" : "Ajouter une Voiture"}
+                </Card.Header>
+                <Form onReset={this.resetVoiture} onSubmit={this.submitVoiture} id="VoitureFormId">
                     <Card.Body>
                         <Form.Row>
                             <Form.Group as={Col} controlId="formGridMarque">
@@ -156,15 +203,22 @@ export default class Voiture12 extends Component {
                     </Card.Body>
                     <Card.Footer style={{"textAlign": "right"}}>
                         <Button size="sm" variant="success" type="submit">
-                            <FontAwesomeIcon icon={faSave}/> Submit
+                            <FontAwesomeIcon icon={faSave}/> {this.state.id ? "Update" : "Submit"}
                         </Button>{' '}
+
                         <Button size="sm" variant="info" type="reset">
                             <FontAwesomeIcon icon={faUndo}/> Reset
                         </Button>
                     </Card.Footer>
                 </Form>
             </Card>
-
         );
     }
-    }
+}
+
+// Use `useParams` and `useNavigate` inside a wrapper function
+export default function(props) {
+    const params = useParams();
+    const navigate = useNavigate();
+    return <Voiture12 {...props} params={params} navigate={navigate} />;
+}

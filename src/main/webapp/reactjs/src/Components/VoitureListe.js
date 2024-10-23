@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faEdit, faList, faTrash} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import MyToast from "./MyToast";
+import {Link} from "react-router-dom";
 
 class VoitureListe extends React.Component {
     constructor(props) {
@@ -130,9 +131,9 @@ class VoitureListe extends React.Component {
                                             <td>{voiture.prix}</td>
                                             <td>
                                                 <ButtonGroup>
-                                                    <Button size="sm" variant="outline-primary">
-                                                        <FontAwesomeIcon icon={faEdit}/>
-                                                    </Button>{' '}
+                                                    <Link to={`/edit/${voiture.id}`} className="btn btn-sm btn-outline-primary">
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </Link>{' '}
                                                     <Button size="sm" variant="outline-danger"
                                                             onClick={() => this.deleteVoiture(voiture.id)}>
                                                         <FontAwesomeIcon icon={faTrash}/>
