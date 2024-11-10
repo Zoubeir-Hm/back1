@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: springdatarest-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'madb'  # The database name is 'madb'
+      MYSQL_USER: 'safouat'    # Username for accessing the database
+      MYSQL_PASSWORD: '111'    # Password for the user 'safouat'
+      MYSQL_ROOT_HOST: '%'     # Allow connections from any host
+      MYSQL_ROOT_PASSWORD: 'rootpassword'  # Set a root password here
+    volumes:
+      - springdatarest-db-data:/var/lib/mysql  # Persist MySQL data
+    network_mode: "host"
+
+  server:
+    image: myimage22
+    depends_on:
+      - db  # Ensure the db service is started before the server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/madb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC  # Database name 'madb'
+      SPRING_DATASOURCE_USERNAME: safouat
+      SPRING_DATASOURCE_PASSWORD: '111'  # Password for the 'safouat' user
+      SPRING_APPLICATION_NAME: SpringDataRest
+      SERVER_PORT: 9093
+    network_mode: "host"
+
+  front:
+    image: frontend
+    depends_on:
+      - server
+    network_mode: "host"
+
+volumes:
+  springdatarest-db-data:
+    driver: local
