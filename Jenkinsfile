@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // Deploy services in detached mode
-                    sh "docker compose up -d"
+                    sh "docker compose up "
                 }
             }
         }
