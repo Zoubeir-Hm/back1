@@ -6,40 +6,46 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: 'madb'  # The database name is 'madb'
-      MYSQL_USER: 'safouat'    # Username for accessing the database
-      MYSQL_PASSWORD: '111'    # Password for the user 'safouat'
-      MYSQL_ROOT_HOST: '%'     # Allow connections from any host
-      MYSQL_ROOT_PASSWORD: 'rootpassword'  # Set a root password here
+      MYSQL_DATABASE: 'madb'
+      MYSQL_USER: 'safouat'
+      MYSQL_PASSWORD: '111'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
     volumes:
-      - springdatarest-db-data:/var/lib/mysql  # Persist MySQL data
+      - springdatarest-db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"  # Expose MySQL port to the host machine
     networks:
-      - app-network
+      - app_network
 
   server:
     image: myimage22
     depends_on:
-      - db  # Ensure the db service is started before the server
+      - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/madb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC  # Database name 'madb'
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/madb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: safouat
-      SPRING_DATASOURCE_PASSWORD: '111'  # Password for the 'safouat' user
+      SPRING_DATASOURCE_PASSWORD: '111'
       SPRING_APPLICATION_NAME: SpringDataRest
       SERVER_PORT: 9093
+    ports:
+      - "9093:9093"  # Expose Spring Boot server port to the host machine
     networks:
-      - app-network
+      - app_network
 
   front:
     image: frontend
     depends_on:
       - server
+    ports:
+      - "3000:3000"  # Expose the frontend on port 8080
     networks:
-      - app-network
+      - app_network
 
 volumes:
   springdatarest-db-data:
     driver: local
 
 networks:
-  app-network:
+  app_network:
     driver: bridge
