@@ -29,11 +29,17 @@ pipeline {
                         -Dsonar.projectKey=Spring1Test \
                         -Dsonar.projectName='Spring1Test' \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.token=sqp_cd8b4dbdbac99416c93097ae87b62ae7acdee902
+                        -Dsonar.token=squ_03720bec86e889a86de054b32a602e106b2129ba
                     """
                 }
             }
         }
+
+
+
+        
+
+        
 
         stage("Deploy") {
             steps {
